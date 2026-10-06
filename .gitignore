@@ -1,0 +1,34 @@
+# Build output / PlatformIO
+.pio/
+.pioenvs/
+.piolibdeps/
+build/
+*.bin
+*.elf
+*.map
+*.hex
+
+# Arduino IDE
+*.o
+*.a
+*.d
+*.su
+/tmp/
+*.tmp
+
+# Compiled LittleFS / SPIFFS images
+*.spiffs
+*.littlefs
+data_image/
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+
+# Secrets (keep real credentials out of git)
+secrets.h
+credentials.h
+.env
