@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<!--
+  ============================================================================
+  EVIL PORTAL - captive portal demo page for ESP32-S3
+  ============================================================================
+  Honestly-labeled WiFi security teaching/demo artifact. It is NOT a clone of
+  any real brand, ISP, or service. The page announces itself as an "Evil
+  Portal" and states the connection is UNSECURED so nobody is deceived.
+
+  Single self-contained file: inline CSS + JS, no external assets, small
+  footprint so it serves straight off the ESP32-S3 (SD / SPIFFS / LittleFS).
+
+  ---- STUFF YOU'LL LIKELY TWEAK ----
+  * Title text ......... search for  DATA-TITLE
+  * Colors / glow ...... search for  :root  (CSS variables at top of <style>)
+  * Form action / field names .. search for  FORM-ACTION  (below)
+
+  ---- FIRMWARE: matched to YOUR custom sketch ----
+  Wired to your Arduino WebServer sketch (portasl-gemini-code...cpp):
+        handleLogin() reads server.arg("username") and server.arg("password")
+        route is:  server.on("/login", HTTP_POST, handleLogin);
+  So this form uses:
+        <form method="POST" action="/login">  with fields username + password
+  Drop this file in as portalHTML (or serve it from SPIFFS/LittleFS at "/").
+  If you ever change the route or arg names in the sketch, change them here too.
+  ============================================================================
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EVIL PORTAL</title>
+<style>
+  :root{
+    /* ---- tweak the whole vibe from here ---- */
+    --bg:#05070a;
+    --panel:#0b0f16;
+    --accent:#00ff9c;      /* primary neon (title, borders, button) */
+    --accent-dim:#00b36e;
+    --warn:#ff2d55;        /* unsecured warning red */
+    --text:#c8f7e4;
+    --muted:#5a6b74;
+    --glow:0 0 8px rgba(0,255,156,.7), 0 0 22px rgba(0,255,156,.35);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:
+      radial-gradient(circle at 50% 0%, rgba(0,255,156,.08), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:"Courier New",ui-monospace,Consolas,monospace;
+    display:flex;align-items:center;justify-content:center;
+    min-height:100vh;padding:18px;
+    /* faint scanline texture */
+    background-size:100% 100%, 100% 4px;
+    background-image:
+      radial-gradient(circle at 50% 0%, rgba(0,255,156,.08), transparent 55%),
+      repeating-linear-gradient(transparent 0 2px, rgba(0,0,0,.25) 2px 4px);
+  }
+  .box{
+    width:100%;max-width:400px;
+    background:var(--panel);
+    border:1px solid var(--accent-dim);
+    border-radius:10px;
+    box-shadow:var(--glow);
+    padding:26px 22px 22px;
+    position:relative;overflow:hidden;
+  }
+  .box::before{ /* top accent bar */
+    content:"";position:absolute;top:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  }
+  .title{ /* DATA-TITLE */
+    font-size:30px;font-weight:bold;letter-spacing:4px;text-align:center;
+    color:var(--accent);text-shadow:var(--glow);
+    animation:flick 3.5s infinite;
+  }
+  @keyframes flick{0%,97%,100%{opacity:1}98%{opacity:.4}99%{opacity:.85}}
+  .sub{
+    text-align:center;color:var(--muted);font-size:11px;
+    letter-spacing:2px;margin-top:4px;margin-bottom:16px;
+  }
+  .warn{
+    border:1px solid var(--warn);
+    background:rgba(255,45,85,.08);
+    color:var(--warn);
+    font-size:12px;letter-spacing:1px;line-height:1.5;
+    text-align:center;padding:9px 10px;border-radius:6px;
+    margin-bottom:20px;
+    box-shadow:0 0 10px rgba(255,45,85,.3);
+    animation:pulse 2s infinite;
+  }
+  @keyframes pulse{0%,100%{box-shadow:0 0 10px rgba(255,45,85,.25)}50%{box-shadow:0 0 18px rgba(255,45,85,.55)}}
+  label{display:block;font-size:11px;color:var(--muted);letter-spacing:1px;margin:0 0 5px 2px}
+  input{
+    width:100%;background:#04060a;border:1px solid #1c2630;
+    color:var(--text);font-family:inherit;font-size:14px;
+    padding:11px 12px;border-radius:6px;margin-bottom:15px;outline:none;
+    transition:border .15s,box-shadow .15s;
+  }
+  input:focus{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),var(--glow)}
+  input::placeholder{color:#394750}
+  button{
+    width:100%;cursor:pointer;
+    background:var(--accent);color:#04120b;
+    font-family:inherit;font-weight:bold;font-size:14px;letter-spacing:2px;
+    border:none;border-radius:6px;padding:12px;margin-top:4px;
+    text-shadow:none;box-shadow:var(--glow);
+    transition:transform .08s,filter .15s;
+  }
+  button:hover{filter:brightness(1.15)}
+  button:active{transform:translateY(1px)}
+  .foot{
+    text-align:center;color:var(--muted);font-size:10px;
+    letter-spacing:1px;margin-top:16px;line-height:1.6;
+  }
+  .foot .dot{color:var(--accent)}
+</style>
+</head>
+<body>
+  <main class="box">
+    <div class="title">EVIL&nbsp;PORTAL</div>
+    <div class="sub">// WIFI SECURITY DEMO //</div>
+
+    <div class="warn">
+      &#9888; THIS CONNECTION IS <b>UNSECURED</b><br>
+      Demo access point &mdash; do not enter real credentials.
+    </div>
+
+    <!-- FORM-ACTION: matched to your sketch -> handleLogin() on /login -->
+    <form method="POST" action="/login">
+      <label for="username">USERNAME</label>
+      <input id="username" name="username" type="text" autocomplete="off"
+             placeholder="user" required>
+
+      <label for="password">PASSWORD</label>
+      <input id="password" name="password" type="password" autocomplete="off"
+             placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" required>
+
+      <button type="submit">CONNECT &rsaquo;</button>
+    </form>
+
+    <div class="foot">
+      <span class="dot">&#9679;</span> ESP32-S3 &nbsp;|&nbsp; captive portal demo
+      <br>for authorized testing &amp; education only
+    </div>
+  </main>
+</body>
+</html>
